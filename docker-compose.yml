@@ -1,0 +1,53 @@
+version: '3'
+services:
+  mongo:
+    image: loubnamessoussi/ecommerce-app:mongo
+    container_name: mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+
+  products:
+    image: loubnamessoussi/ecommerce-app:products
+    container_name: products_service
+    ports:
+      - "4000:4000"
+    environment:
+      - MONGO_URI=mongodb://mongo:27017/produit-service
+    depends_on:
+      - mongo
+
+  commands:
+    image: loubnamessoussi/ecommerce-app:commands
+    container_name: commands_service
+    ports:
+      - "4001:4001"
+    environment:
+      - MONGO_URI=mongodb://mongo:27017/commande-service
+    depends_on:
+      - mongo
+
+  auth:
+    image: loubnamessoussi/ecommerce-app:auth
+    container_name: auth_service
+    ports:
+      - "4002:4002"
+    environment:
+      - MONGO_URI=mongodb://mongo:27017/auth-service
+    depends_on:
+      - mongo
+
+  frontend:
+    image: loubnamessoussi/ecommerce-app:frontend
+    build: ./frontEnd/front_end
+    container_name: frontend_service
+    ports:
+      - "8080:8080"
+    depends_on:
+      - products
+      - commands
+      - auth
+
+volumes:
+  mongo-data:
