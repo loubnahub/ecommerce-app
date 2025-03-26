@@ -6,14 +6,13 @@ const isLoggedIn=require('./middleware.js')
 const Utilisateur=require('./utilisateurs.js')
 const jwt=require('jsonwebtoken')
 const bcrypt=require('bcryptjs')
-const cors=require('cors')
 mongoose.set('strictQuery',true)
 mongoose.connect("mongodb://mongo:27017/auth-service", {
     useNewUrlParser: true,
     useUnifiedTopology: true
 });
 app.use(express.json())
-app.use(cors());
+
 app.listen(PORT,()=>{
     console.log('connected hun')
 })

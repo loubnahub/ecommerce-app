@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { useNavigate,Link } from 'react-router-dom';
 const Product=({data,cmd,setCmd,DeleteProduct})=>{
   const navigate=useNavigate()
-  const token=localStorage.getItem('authToken')
+ 
   const [bool,setBool]=useState(false)
   const [prod,setProd]=useState({
     _id:data._id

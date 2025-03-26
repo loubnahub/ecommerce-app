@@ -1,12 +1,10 @@
 const express=require('express')
 const app=express()
 const PORT=4000
-const cors=require('cors')
 const mongoose=require("mongoose")
 const isLogged=require('./middleware.js')
 const Produit=require('./Produit.js')
 app.use(express.json())
-app.use(cors())
 mongoose.set('strictQuery',true)
 mongoose.connect("mongodb://mongo:27017/produit-service", {
     useNewUrlParser: true,

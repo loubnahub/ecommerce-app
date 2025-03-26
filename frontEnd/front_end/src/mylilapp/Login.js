@@ -11,7 +11,7 @@ const Login = () => {
         }
     }, []);
 
-    
+ 
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -28,8 +28,8 @@ const Login = () => {
 
       
         const data = await response.json();
-        localStorage.setItem('authToken', data);
         if(response.status==200){
+                localStorage.setItem('authToken', data);
                   navigate('/');      
 
         }

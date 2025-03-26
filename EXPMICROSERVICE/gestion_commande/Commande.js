@@ -11,7 +11,8 @@ const CommandeSchema=mongoose.Schema({
     created_at:{
         type:Date,
         default:Date.now()
-    }
+    },
+    status:String
    
 
 })

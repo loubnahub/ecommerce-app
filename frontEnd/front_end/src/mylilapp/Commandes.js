@@ -1,8 +1,10 @@
 import {useState,useEffect} from 'react'
 import axios from 'axios'
+import { useNavigate } from 'react-router-dom'
 const Commandes=()=>{
     const [commandes,setCommandes]=useState([])
     const[produits,setProduits]=useState([])
+    const navigate=useNavigate()
     const token=localStorage.getItem('authToken')
     function cancelOrder(id){
                 axios.delete(`/commande/todelete/${id}`,{
@@ -16,24 +18,44 @@ const Commandes=()=>{
                     setCommandes(commandes.filter(cmd => cmd._id !== id))
                 })
             }
+    async function fetchData() {
+                const res1=await axios.get('/commande/list',{
+                headers:{
+                    "Authorization":`Bearer ${token}`
+                }
+            })
+            setCommandes(res1.data)
+            const productIds = [...new Set(res1.data.flatMap(cmd => cmd.produits.map(prod => prod._id)))];
+            const res=await axios.post('/produits/acheter',{"ids":productIds},{
+                headers:{
+                    "Authorization":`Bearer ${token}`
+                }
+            })
+            setProduits(res.data)
+            }
+
     useEffect(()=>{
-        async function fetchData() {
-            const res1=await axios.get('/commande/list',{
-            headers:{
-                "Authorization":`Bearer ${token}`
-            }
-        })
-        setCommandes(res1.data)
-        const productIds = [...new Set(res1.data.flatMap(cmd => cmd.produits.map(prod => prod._id)))];
-        const res=await axios.post('/produits/acheter',{"ids":productIds},{
-            headers:{
-                "Authorization":`Bearer ${token}`
-            }
-        })
-        setProduits(res.data)
+        if (!token) {
+            navigate('/Login');
         }
+       
         fetchData()
+        const interval = setInterval(fetchData, 5000); 
+
+        return () => clearInterval(interval);
     },[]) 
+    
+   function changeColor(status){
+    switch(status){
+        case 'Received':return <span style={{color:'red'}}>Received</span>
+        case 'Processing':return <span style={{color:'yellow'}}>Processing</span>
+        case 'Shipped':return <span style={{color:'green'}}>Shipped</span>
+        case 'Delivered':return <span style={{color:'#1F51FF'}}>Delivered</span>
+        default:return <span style={{color:'pink'}}>Waiting ...</span>
+
+
+    }
+   }
     
     return <div className=" mt-4"><h2 className='w-100 text-center'>Your Orders</h2>
     {commandes.length?
@@ -62,7 +84,7 @@ const Commandes=()=>{
             })}</table></td>
         <td>{cmd.prix_total} DH</td>
         <td><button className='btn btn-danger button' onClick={()=>cancelOrder(cmd._id)}>cancel Order</button></td>
-            <td className='text-warning '>waiting ...</td>
+            <td>{changeColor(cmd.status)}</td>
     </tr>)}</tbody>
     </table>:<p className='text-center text-muted'>no orders were put down yet ...</p>}</div>
 }

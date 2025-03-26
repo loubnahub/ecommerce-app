@@ -8,8 +8,8 @@ export default function FormProd(){
         e.preventDefault()
         const token = localStorage.getItem('authToken');
         if (!token) {
-      return;
-        }
+          navigate('/Login');
+      }
         const response=await axios.post('/produits/ajouter', {
             label: form.label,
             description: form.description,

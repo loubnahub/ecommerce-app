@@ -1,46 +1,72 @@
-version: '3'
 services:
   mongo:
-    image: loubnamessoussi/ecommerce-app:mongo
+    image: mongo
     container_name: mongo
     ports:
       - "27017:27017"
     volumes:
       - mongo-data:/data/db
+    networks:
+      - app-network 
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+      - app-network 
 
   products:
-    image: loubnamessoussi/ecommerce-app:products
+    # build: ./EXPMICROSERVICE/gestion_produits
+    image: loubnamessoussi/ecommerce-app:products_v2
     container_name: products_service
     ports:
       - "4000:4000"
-    environment:
-      - MONGO_URI=mongodb://mongo:27017/produit-service
     depends_on:
       - mongo
+    networks:
+      - app-network 
 
   commands:
-    image: loubnamessoussi/ecommerce-app:commands
+    # build: ./EXPMICROSERVICE/gestion_commande
+    # image: loubnamessoussi/ecommerce-app:commands_v2
+    image: loubnamessoussi/ecommerce-app:commands_v3
+
     container_name: commands_service
     ports:
       - "4001:4001"
-    environment:
-      - MONGO_URI=mongodb://mongo:27017/commande-service
+
     depends_on:
       - mongo
+    networks:
+      - app-network 
+  consumer:
+    # build: ./EXPMICROSERVICE/consumer_service
+    image: loubnamessoussi/ecommerce-app:consumer
 
+    container_name: consumer_service
+    depends_on:
+      - rabbitmq
+    networks:
+      - app-network
   auth:
-    image: loubnamessoussi/ecommerce-app:auth
+    # build: ./EXPMICROSERVICE/auth-service
+    image: loubnamessoussi/ecommerce-app:auth_v2
     container_name: auth_service
     ports:
       - "4002:4002"
-    environment:
-      - MONGO_URI=mongodb://mongo:27017/auth-service
+   
     depends_on:
       - mongo
+    networks:
+      - app-network 
 
   frontend:
-    image: loubnamessoussi/ecommerce-app:frontend
-    build: ./frontEnd/front_end
+    # build: ./frontEnd/front_end  
+    # image: loubnamessoussi/ecommerce-app:frontend_v2
+    image: loubnamessoussi/ecommerce-app:frontend_v3
+
     container_name: frontend_service
     ports:
       - "8080:8080"
@@ -48,6 +74,26 @@ services:
       - products
       - commands
       - auth
+    networks:
+      - app-network 
+  mongo-express:
+    image: mongo-express
+    container_name: mongo_express
+    environment:
+      - ME_CONFIG_MONGODB_SERVER=mongo
+      - ME_CONFIG_MONGODB_PORT=27017
+      - ME_CONFIG_BASICAUTH_USERNAME=admin
+      - ME_CONFIG_BASICAUTH_PASSWORD=admin
+    ports:
+      - "8081:8081"
+    depends_on:
+      - mongo
+    networks:
+      - app-network
 
 volumes:
   mongo-data:
+
+networks:
+  app-network:
+    driver: bridge

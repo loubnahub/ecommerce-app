@@ -7,6 +7,9 @@ export default function FormProd(){
     const token =localStorage.getItem('authToken')
     const {id}=useParams()
     useEffect(()=>{
+      if (!token) {
+        navigate('/Login');
+    }
         axios.get(`/produits/list/${id}`, {
             headers: {
                 'Content-Type': 'application/json',
@@ -17,8 +20,8 @@ export default function FormProd(){
     async function validate(e){
         e.preventDefault()
         if (!token) {
-      return;
-        }
+          navigate('/Login');
+      }
         const response=await axios.patch(`/produits/modify/${id}`, {
             label: form.label,
             description: form.description,
